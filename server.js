@@ -1,28 +1,28 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const cors = require('cors');
+const path = require('path');
 
 const app = express();
-app.use(express.json());
-app.use(cors());  // Habilita CORS
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-const productoSchema = new mongoose.Schema({
+mongoose.connect('mongodb+srv://admin:admin@data3apps.owzveqi.mongodb.net/elysium?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true });
+
+const ProductoSchema = new mongoose.Schema({
     nombre: String,
     precio: Number
 });
 
-const Producto = mongoose.model('Producto', productoSchema);
+const Producto = mongoose.model('Producto', ProductoSchema);
 
-mongoose.connect('mongodb+srv://admin:admin@data3apps.owzveqi.mongodb.net/Data3apps?retryWrites=true&w=majority', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
+app.post('/productos', (req, res) => {
+    const producto = new Producto(req.body);
+    producto.save().then(() => res.status(201).send(producto));
 });
 
-app.get('/productos', async (req, res) => {
-    const productos = await Producto.find();
-    res.json(productos);
+app.get('/productos', (req, res) => {
+    Producto.find().then(productos => res.send(productos));
 });
 
-app.listen(3002, () => {
-    console.log('App de Productos escuchando en el puerto 3002');
-});
+app.listen(3002, () => console.log('App2 listening on port 3002'));
